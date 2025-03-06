@@ -25,7 +25,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   	),
 
 	[1] = LAYOUT_65_ansi_blocker( /* FN */
-		QK_BOOT,             KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______,          KC_PRINT_SCREEN,
+		QK_BOOT,             KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______,          KC_PSCR,
 		KC_CAPS,             _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, UG_NEXT,
 		UG_TOGG, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,             _______,                   UG_VALU,
 		_______,             _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   KC_PGUP, KC_TRNS,
@@ -48,3 +48,32 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		_______, _______, _______,                             _______,                            _______, _______,          _______, _______, _______
   	)
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  static bool aHeld = false;
+  static bool dHeld = false;
+  switch (keycode) {
+    case KC_A:
+      aHeld = record->event.pressed;
+      if (dHeld && aHeld) {
+          unregister_code(KC_D);
+      } else if (dHeld && !aHeld){
+          unregister_code(KC_A);
+          register_code(KC_D);
+          return false; // don't send original key pressed
+      }
+      return true;
+    case KC_D:
+      dHeld = record->event.pressed;
+      if (aHeld && dHeld) {
+          unregister_code(KC_A);
+      } else if (aHeld && !dHeld){
+          unregister_code(KC_D);
+          register_code(KC_A);
+          return false; // don't send original key pressed
+      }
+      return true;
+    default:
+      return true; // Process all other keycodes normally
+  }
+}
